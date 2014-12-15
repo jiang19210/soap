@@ -1,8 +1,8 @@
 package com.ming.soap.pojo;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -38,10 +38,8 @@ public class WsdlEntitys implements Serializable {
 		if (wsdlEntitys.containsKey(key)) {
 			wsdlEntity = wsdlEntitys.get(key);
 		} else {
-			synchronized (WSDL_ENTITY) {
-				wsdlEntity = new WsdlEntity(wsdlUrl, serviceNamespace, serviceName, servicePort);
-				WSDL_ENTITY.put(key, wsdlEntity);
-			}
+			wsdlEntity = new WsdlEntity(wsdlUrl, serviceNamespace, serviceName, servicePort);
+			wsdlEntitys.put(key, wsdlEntity);
 		}
 		return wsdlEntity;
 	}
@@ -52,7 +50,7 @@ public class WsdlEntitys implements Serializable {
 	/**
 	 * 存储 WsdlEntity 对象的Map，key=WsdlEntity.serviceName , value=WsdlEntity
 	 * */
-	private final static Map<String, WsdlEntity> WSDL_ENTITY = new HashMap<String, WsdlEntity>();
+	private final static Map<String, WsdlEntity> WSDL_ENTITY = new ConcurrentHashMap<String, WsdlEntity>();
 	
 	private final static WsdlEntitys obj = new WsdlEntitys();
 	
