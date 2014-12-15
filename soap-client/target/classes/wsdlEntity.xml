@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsdlEntitys>
+ <wsdlEntity>
+  <id>GetInfoServiceImplService</id>
+  <serviceName>GetInfoServiceImplService</serviceName>
+  <serviceNamespace>http://impl.service.app.demo.sysware.com/</serviceNamespace>
+  <servicePort>GetInfoServiceImplPort</servicePort>
+  <wsdlUrl>http://localhost:8383/cxf/ws/getInfoService?wsdl</wsdlUrl>
+ </wsdlEntity>
+</wsdlEntitys>
