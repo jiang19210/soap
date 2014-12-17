@@ -1,6 +1,6 @@
 package com.ming.soap.xml.parser;
 
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import javax.xml.bind.Unmarshaller;
 import com.ming.soap.pojo.WsdlEntity;
 import com.ming.soap.pojo.WsdlEntitys;
 
-public class WsdlEntityParser {
+public class WsdlEntityParser extends AbstractXmlParser implements XmlParser {
 	
 	private final static WsdlEntityParser obj = new WsdlEntityParser () ;
 	/**
@@ -45,7 +45,7 @@ public class WsdlEntityParser {
 	 * */
 	protected void loadWsdlEntitys () {
 		WSDL_ENTITY.clear();
-		WsdlEntitys wsdls = this.parser();
+		WsdlEntitys wsdls = this.parser(WsdlEntityParser.class.getClassLoader().getResourceAsStream("wsdlEntity.xml"));
 		for (WsdlEntity wsdl : wsdls.getWsdlEntity()) {
 			WSDL_ENTITY.put(wsdl.getId(), wsdl);
 		}
@@ -53,15 +53,18 @@ public class WsdlEntityParser {
 	/**
 	 * 解析wsdl配置文件，并存储在WsdlEntitys对象中
 	 * */
-	protected WsdlEntitys parser() {
+	public WsdlEntitys parser(InputStream inputStreamXml) {
 		JAXBContext ctx = null;
 		Unmarshaller um = null;
 		WsdlEntitys wsdls = null;
 		try {
+			super.XSDValidate(inputStreamXml, WsdlEntityParser.class.getResourceAsStream("wsdlEntity.xsd"));
 			ctx = JAXBContext.newInstance(WsdlEntitys.class);
 			um = ctx.createUnmarshaller();
-			wsdls = (WsdlEntitys)um.unmarshal(new InputStreamReader(WsdlEntityParser.class.getClassLoader().getResourceAsStream("wsdlEntity.xml")));
+			wsdls = (WsdlEntitys)um.unmarshal(inputStreamXml);
 		} catch (JAXBException e) {
+			throw new XmlParserException("[WsdlEntitys parser failed, the Exception is JAXBException;]", e);
+		} catch (XmlValidateException e) {
 			throw new XmlParserException("[WsdlEntitys parser failed, the Exception is JAXBException;]", e);
 		}
 		return wsdls;
