@@ -23,6 +23,7 @@ import org.w3c.dom.NodeList;
 import com.ming.soap.pojo.Element;
 import com.ming.soap.pojo.Message;
 import com.ming.soap.pojo.WsdlEntity;
+import com.ming.soap.reflect.ClassFieldException;
 import com.ming.soap.reflect.ClassSetterOrGetterException;
 import com.ming.soap.reflect.ClassUtils;
 import com.ming.soap.util.ObjectUtils;
@@ -50,14 +51,15 @@ public class SoapClient {
 	 * */
 	private SoapClient() {
 	}
+	
 	/**
-	 * webservice调用的核心方法
+	 * 同步调用服务操作。 客户端负责确保在编组 msg 对象时根据所用协议绑定的要求形成它们。 
 	 * @author jianggm
 	 * @param wsdl wsdlEntity.xml配置信息
-	 * @param method  要调用的webservice方法
-	 * @param clzz 返回值类型
+	 * @param message  一个对象，将形成用来调用操作的消息或消息负载
 	 * */
-	public Object invoke(WsdlEntity wsdl, Message method, Class<?> clzz) throws SoapClientException   {
+	public Document doInvoke (WsdlEntity wsdl, Message message) throws SoapClientException {
+
 		try {
 			// 1、创建服务(Service)
 			URL url = new URL(wsdl.getWsdlUrl().toString());
@@ -74,26 +76,52 @@ public class SoapClient {
 			SOAPMessage msg = MessageFactory.newInstance().createMessage();
 			SOAPEnvelope envelope = msg.getSOAPPart().getEnvelope();
 			SOAPBody body = envelope.getBody();
-			setSOAPBody(body, method);
+			setSOAPBody(body, message);
 			// 5、通过Dispatch传递消息,会返回响应消息
 			SOAPMessage response = dispatch.invoke(msg);
 			// 将响应的消息转换为dom对象
 			Document doc = response.getSOAPPart().getEnvelope().getBody()
 					.extractContentAsDocument();
-			
-			Node node = doc.getElementsByTagName(method.getResult())
-					.item(0);
-			
-			return nodeToObject(node, clzz);
+			return doc;
 		} catch (SOAPException e) {
+			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is SOAPException;]",
 					e);
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is IOException;]",
 					e);
 		} catch (DOMException e) {
+			e.printStackTrace();
+			throw new SoapClientException(
+					"[SoapClient invoke failed, the Exception is DOMException;]",
+					e);
+		} catch (ClassFieldException e) {
+			e.printStackTrace();
+			throw new SoapClientException(
+					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
+					e);
+		} 
+	}
+	/**
+	 * 同步调用服务操作。 客户端负责确保在编组 msg 对象时根据所用协议绑定的要求形成它们。 返回clzz类型的对象数据
+	 * @author jianggm
+	 * @param wsdl wsdlEntity.xml配置信息
+	 * @param message  一个对象，将形成用来调用操作的消息或消息负载
+	 * @param clzz 返回值类型
+	 * */
+	public Object invoke(WsdlEntity wsdl, Message message, Class<?> clzz) throws SoapClientException {
+		try {
+			// 将响应的消息转换为dom对象
+			Document doc = doInvoke(wsdl, message);
+			
+			Node node = doc.getElementsByTagName(message.getResult())
+					.item(0);
+			return nodeToObject(node, clzz);
+		} catch (DOMException e) {
+			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is DOMException;]",
 					e);
@@ -103,21 +131,48 @@ public class SoapClient {
 					"[SoapClient invoke failed, the Exception is InstantiationException;]" ,
 					e);
 		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is IllegalAccessException;]",
 					e);
-		} catch (ClassSetterOrGetterException e) {
+		} catch (ClassFieldException e) {
+			e.printStackTrace();
+			throw new SoapClientException(
+					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
+					e);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+			throw new SoapClientException(
+					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
+					e);
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
 					e);
 		} 
 	}
-	
-	protected void setSOAPBody (SOAPBody body, Message method) throws SOAPException, ClassSetterOrGetterException {
+	/**
+	 * 同步调用服务操作。 客户端负责确保在编组 msg 对象时根据所用协议绑定的要求形成它们。 返回clzz类型的对象数据
+	 * @author jianggm
+	 * @param wsdl wsdlEntity.xml配置信息
+	 * @param message  一个对象，将形成用来调用操作的消息或消息负载
+	 * */
+	public String invoke(WsdlEntity wsdl, Message message) throws SoapClientException {
+		return (String)this.invoke(wsdl, message, String.class);
+	}
+	/**
+	 * 根据message设置SOAPEnvelope中BODY请求消息
+	 * @author jianggm
+	 * @param body SOAPEnvelope 中  body中的信息
+	 * @param message 请求消息
+	 * @throws ClassFieldException 
+	 * */
+	protected void setSOAPBody (SOAPBody body, Message message) throws SOAPException, ClassFieldException {
 		// 4、创建QName来指定消息中传递数据
-		QName ename = new QName(method.getNamespace(), method.getName(), method.getPrefix());// <nn:add xmlns="xx"/>
+		QName ename = new QName(message.getNamespace(), message.getName(), message.getPrefix());// <nn:add xmlns="xx"/>
 		SOAPBodyElement ele = body.addBodyElement(ename);
-		for (Element arg : method.getArgument()) {
+		for (Element arg : message.getArgument()) {
 			if (arg.getValue() == null) {
 				ele.addChildElement(arg.getName());
 				continue;
@@ -132,7 +187,7 @@ public class SoapClient {
 					if (ClassUtils.CONSTANT_SERIALVERSIONUID.equals(field.getName())) {
 						continue;
 					}
-					String value = ClassUtils.getter(arg.getValue(), field.getName()).toString();
+					String value = (String)ClassUtils.getFieldValue(arg.getValue(), field);
 					soapObj.addChildElement(field.getName()).setValue(value);
 				}
 			}
@@ -145,10 +200,13 @@ public class SoapClient {
 	 * @throws ClassSetterOrGetterException 
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
+	 * @throws NoSuchFieldException 
+	 * @throws ClassFieldException 
+	 * @throws SecurityException 
 	 * @throws DOMException 
 	 * */
-	protected Object nodeToObject (Node node, Class<?> clzz) throws DOMException,
-	ClassSetterOrGetterException, InstantiationException, IllegalAccessException {
+	protected Object nodeToObject (Node node, Class<?> clzz) throws InstantiationException, IllegalAccessException,
+	DOMException, SecurityException, ClassFieldException, NoSuchFieldException   {
 		NodeList nodeList = node.getChildNodes();
 		Node n = null;
 		Object val = StringUtils.parseValueForClass(node.getTextContent(), clzz);
@@ -157,7 +215,7 @@ public class SoapClient {
 			t = clzz.newInstance();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				n = nodeList.item(i);
-				ClassUtils.setter(t, n.getNodeName(), n.getTextContent());
+				ClassUtils.setFieldValue(t, n.getTextContent(), clzz.getDeclaredField(n.getNodeName()));//setter(t, n.getNodeName(), n.getTextContent());
 			}
 		}
 		return t;
