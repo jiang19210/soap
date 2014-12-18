@@ -15,4 +15,7 @@
   </properties>
   <dependencies>
   </dependencies>
+   <build>
+    <finalName>soap-client</finalName>
+  </build>
 </project>

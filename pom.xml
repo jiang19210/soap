@@ -16,8 +16,6 @@
 	<modules>
 		<module>soap-client</module>
 		<module>soap-server</module>
-		<module>soap-cc</module>
-		<module>soap-server1</module>
 	</modules>
   <dependencies>
    <dependency>
