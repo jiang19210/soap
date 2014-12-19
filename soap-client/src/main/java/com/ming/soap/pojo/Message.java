@@ -2,7 +2,9 @@ package com.ming.soap.pojo;
 
 import java.io.Serializable;
 /**
- * webservice 方法
+ * soap message消息
+ * @author jianggm
+ * @version 0.0.1-SNAPSHOT
  * */
 public class Message implements Serializable {
 

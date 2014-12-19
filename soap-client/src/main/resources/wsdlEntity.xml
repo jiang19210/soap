@@ -7,13 +7,6 @@
 		<serviceName>GetInfoServiceImplService</serviceName>
 		<serviceNamespace>http://impl.service.app.demo.sysware.com/</serviceNamespace>
 		<servicePort>GetInfoServiceImplPort</servicePort>
-		<wsdlUrl>http://localhost:8383/cxf/ws/getInfoService?wsdl</wsdlUrl>
-	</wsdlEntity>
-	<wsdlEntity>
-		<id>GetInfoServiceImplService</id>
-		<serviceName>GetInfoServiceImplService</serviceName>
-		<serviceNamespace>http://impl.service.app.demo.sysware.com/</serviceNamespace>
-		<servicePort>GetInfoServiceImplPort</servicePort>
-		<wsdlUrl>http://localhost:8383/cxf/ws/getInfoService?wsdl</wsdlUrl>
+		<wsdlUrl>http://localhost:8080/soap-server/ws/getInfoService?wsdl</wsdlUrl>
 	</wsdlEntity>
 </wsdlEntitys>

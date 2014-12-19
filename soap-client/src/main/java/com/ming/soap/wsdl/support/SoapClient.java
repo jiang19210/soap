@@ -39,7 +39,7 @@ public class SoapClient {
 	/**
 	 * SoapClient 单例
 	 * */
-	private static SoapClient client = new SoapClient();
+	private final static SoapClient client = new SoapClient();
 	/**
 	 * 获取SoapClient 的实例，是单例模式
 	 * */
@@ -98,7 +98,7 @@ public class SoapClient {
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is DOMException;]",
 					e);
-		} catch (ClassFieldException e) {
+		} catch (ClassSetterOrGetterException e) {
 			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
@@ -135,7 +135,7 @@ public class SoapClient {
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is IllegalAccessException;]",
 					e);
-		} catch (ClassFieldException e) {
+		} catch (ClassSetterOrGetterException e) {
 			e.printStackTrace();
 			throw new SoapClientException(
 					"[SoapClient invoke failed, the Exception is ClassSetterOrGetterException;]",
@@ -167,8 +167,9 @@ public class SoapClient {
 	 * @param body SOAPEnvelope 中  body中的信息
 	 * @param message 请求消息
 	 * @throws ClassFieldException 
+	 * @throws ClassSetterOrGetterException 
 	 * */
-	protected void setSOAPBody (SOAPBody body, Message message) throws SOAPException, ClassFieldException {
+	protected void setSOAPBody (SOAPBody body, Message message) throws SOAPException, ClassSetterOrGetterException {
 		// 4、创建QName来指定消息中传递数据
 		QName ename = new QName(message.getNamespace(), message.getName(), message.getPrefix());// <nn:add xmlns="xx"/>
 		SOAPBodyElement ele = body.addBodyElement(ename);
@@ -187,7 +188,7 @@ public class SoapClient {
 					if (ClassUtils.CONSTANT_SERIALVERSIONUID.equals(field.getName())) {
 						continue;
 					}
-					String value = (String)ClassUtils.getFieldValue(arg.getValue(), field);
+					String value = ClassUtils.getter(arg.getValue(), field.getName()).toString();
 					soapObj.addChildElement(field.getName()).setValue(value);
 				}
 			}
@@ -206,7 +207,7 @@ public class SoapClient {
 	 * @throws DOMException 
 	 * */
 	protected Object nodeToObject (Node node, Class<?> clzz) throws InstantiationException, IllegalAccessException,
-	DOMException, SecurityException, ClassFieldException, NoSuchFieldException   {
+	DOMException, SecurityException,  NoSuchFieldException, ClassSetterOrGetterException   {
 		NodeList nodeList = node.getChildNodes();
 		Node n = null;
 		Object val = StringUtils.parseValueForClass(node.getTextContent(), clzz);
@@ -215,7 +216,7 @@ public class SoapClient {
 			t = clzz.newInstance();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				n = nodeList.item(i);
-				ClassUtils.setFieldValue(t, n.getTextContent(), clzz.getDeclaredField(n.getNodeName()));//setter(t, n.getNodeName(), n.getTextContent());
+				ClassUtils.setter(t, n.getNodeName(), n.getTextContent());
 			}
 		}
 		return t;

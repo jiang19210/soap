@@ -3,7 +3,7 @@ package com.ming.soap.pojo;
 import java.io.Serializable;
 /**
  * @author jianggm
- * @version 0.0.1
+ * @version 0.0.1-SNAPSHOT
  * wsdl:message 元素类型，相当于java类中的方法参数
  * name  消息类型元素名称,相当于java方法参数名称
  * value 消息类型元素值,相当于java方法参数值

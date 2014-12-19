@@ -52,17 +52,16 @@ public abstract class AbstractXmlParser implements XmlParser, XmlValidate {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
 		Schema schema;
 		try {
-			schema = schemaFactory.newSchema(new StreamSource(inputStreamXml));
+			schema = schemaFactory.newSchema(new StreamSource(inputStreamXxsd));
 			Validator validator = schema.newValidator();
 			InputSource inputSource = new InputSource(inputStreamXml);
 			Source source = new SAXSource(inputSource);
 			validator.validate(source);
 		} catch (SAXException e) {
 			e.printStackTrace();
-			throw new XmlValidateException("", e);
+			throw new XmlValidateException("[Xml Validate Exception]", e);
 		} catch (IOException e) {
-			e.printStackTrace();
-			throw new XmlValidateException("", e);
+			throw new XmlValidateException("[Xml Validate Exception]", e);
 		}
 
 	}

@@ -1,6 +1,6 @@
 package com.ming.soap.xml.parser;
 
-import java.io.InputStream;
+import java.io.File;
 
 /**
  * XML解析
@@ -12,6 +12,6 @@ public interface XmlParser {
 	 * @author jianggm
 	 * @param  待解析的xml流
 	 * */
-	public Object parser (InputStream inputStreamXml);
+	public Object parser (File file);
 
 }
