@@ -211,15 +211,14 @@ public class SoapClient {
 		NodeList nodeList = node.getChildNodes();
 		Node n = null;
 		Object val = StringUtils.parseValueForClass(node.getTextContent(), clzz);
-		Object t = null;
 		if (val == null) {
-			t = clzz.newInstance();
+			val = clzz.newInstance();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				n = nodeList.item(i);
-				ClassUtils.setter(t, n.getNodeName(), n.getTextContent());
+				ClassUtils.setter(val, n.getNodeName(), n.getTextContent());
 			}
 		}
-		return t;
+		return val;
 	}
 	
 }
