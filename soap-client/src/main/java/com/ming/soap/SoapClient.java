@@ -1,4 +1,4 @@
-package com.ming.soap.wsdl.support;
+package com.ming.soap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
