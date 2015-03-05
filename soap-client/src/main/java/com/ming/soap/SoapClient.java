@@ -3,6 +3,7 @@ package com.ming.soap;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
@@ -36,6 +37,12 @@ import com.ming.soap.util.StringUtils;
  * @version 0.0.1
  * */
 public class SoapClient {
+	/**连接超时
+	 * */
+	private long CONNECTION_TIMEOUT = 0;
+	/**请求超时
+	 * */
+	private long RECIVE_TIMEOUT = 0;
 	/**
 	 * SoapClient 单例
 	 * */
@@ -71,7 +78,17 @@ public class SoapClient {
 			Dispatch<SOAPMessage> dispatch = service.createDispatch(new QName(
 					wsdl.getServiceNamespace(), wsdl.getServicePort()),
 					SOAPMessage.class, Service.Mode.MESSAGE);
-
+			//设置超时时间
+			Map<String, Object> requestContext = dispatch.getRequestContext();
+			
+			//设置连接超时时间
+			if (CONNECTION_TIMEOUT != 0) {
+				requestContext.put("com.sun.xml.internal.ws.connect.timeout", CONNECTION_TIMEOUT); 
+			}
+			//设置请求超时时间
+			if (RECIVE_TIMEOUT != 0) {
+				requestContext.put("com.sun.xml.internal.ws.request.timeout", RECIVE_TIMEOUT);
+			}
 			// 3、创建SOAPMessage
 			SOAPMessage msg = MessageFactory.newInstance().createMessage();
 			SOAPEnvelope envelope = msg.getSOAPPart().getEnvelope();
@@ -160,6 +177,19 @@ public class SoapClient {
 	 * */
 	public String invoke(WsdlEntity wsdl, Message message) throws SoapClientException {
 		return (String)this.invoke(wsdl, message, String.class);
+	}
+	
+	/**
+	 * 设置连接超时
+	 * */
+	public void setConnectionTimeout (long value) {
+		CONNECTION_TIMEOUT = value;
+	}
+	/**
+	 * 设置请求超时
+	 * */
+	public void setReceiveTimeout (long value) {
+		RECIVE_TIMEOUT = value;
 	}
 	/**
 	 * 根据message设置SOAPEnvelope中BODY请求消息
